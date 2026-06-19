@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="운동기록" />
+  <title>매일 운동기록</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Daily Training Log</p>
+        <h1>매일 운동기록</h1>
+        <p class="subtitle">러닝과 웨이트를 한 번에 기록하고 주간 흐름을 확인하세요.</p>
+      </div>
+      <button id="installBtn" class="install-btn hidden">홈화면 추가</button>
+    </header>
+
+    <main>
+      <section class="summary-grid" aria-label="요약">
+        <article class="summary-card">
+          <span>이번 주 러닝</span>
+          <strong id="weekKm">0 km</strong>
+        </article>
+        <article class="summary-card">
+          <span>이번 주 운동</span>
+          <strong id="weekSessions">0회</strong>
+        </article>
+        <article class="summary-card">
+          <span>연속 기록</span>
+          <strong id="streak">0일</strong>
+        </article>
+        <article class="summary-card">
+          <span>최근 몸무게</span>
+          <strong id="latestWeight">- kg</strong>
+        </article>
+      </section>
+
+      <section class="card calendar-card">
+        <div class="section-head">
+          <h2>날짜별 기록</h2>
+          <input id="datePicker" type="date" />
+        </div>
+        <div id="calendar" class="calendar"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2 id="formTitle">오늘 운동 기록</h2>
+          <button id="clearDayBtn" class="ghost-btn" type="button">오늘 기록 삭제</button>
+        </div>
+
+        <form id="workoutForm" class="workout-form">
+          <label>
+            컨디션
+            <select id="condition">
+              <option value="좋음">좋음</option>
+              <option value="보통" selected>보통</option>
+              <option value="피곤">피곤</option>
+              <option value="휴식">휴식</option>
+            </select>
+          </label>
+
+          <label>
+            몸무게 kg
+            <input id="bodyWeight" inputmode="decimal" type="number" step="0.1" min="0" placeholder="예: 82.5" />
+          </label>
+
+          <div class="split">
+            <label>
+              러닝 거리 km
+              <input id="runKm" inputmode="decimal" type="number" step="0.1" min="0" placeholder="예: 5" />
+            </label>
+            <label>
+              러닝 시간 분
+              <input id="runMin" inputmode="numeric" type="number" step="1" min="0" placeholder="예: 35" />
+            </label>
+          </div>
+
+          <label>
+            러닝 메모
+            <input id="runMemo" type="text" placeholder="페이스, 코스, 느낌" />
+          </label>
+
+          <div class="exercise-head">
+            <div>
+              <h3>웨이트</h3>
+              <p class="helper">운동명이 헷갈리면 아래 참조 링크에서 부위별 동작명을 확인하세요.</p>
+            </div>
+            <button id="addExerciseBtn" class="ghost-btn" type="button">운동 추가</button>
+          </div>
+          <div class="reference-links">
+            <a href="https://musclewiki.com/" target="_blank" rel="noopener noreferrer">MuscleWiki 동작 찾기</a>
+            <a href="https://www.acefitness.org/resources/everyone/exercise-library/" target="_blank" rel="noopener noreferrer">ACE 운동 라이브러리</a>
+            <a href="https://en.wikipedia.org/wiki/List_of_weight_training_exercises" target="_blank" rel="noopener noreferrer">웨이트 운동명 목록</a>
+          </div>
+          <div id="exerciseList" class="exercise-list"></div>
+
+          <label>
+            전체 메모
+            <textarea id="memo" rows="3" placeholder="오늘 운동 느낌, 통증, 다음 목표"></textarea>
+          </label>
+
+          <button class="primary-btn" type="submit">기록 저장</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>최근 기록</h2>
+          <button id="exportBtn" class="ghost-btn" type="button">백업</button>
+        </div>
+        <div id="history" class="history"></div>
+      </section>
+    </main>
+  </div>
+
+  <datalist id="exerciseNames">
+    <option value="스쿼트"></option><option value="레그프레스"></option><option value="런지"></option>
+    <option value="데드리프트"></option><option value="벤치프레스"></option><option value="푸시업"></option>
+    <option value="숄더프레스"></option><option value="랫풀다운"></option><option value="시티드 로우"></option>
+    <option value="바벨 로우"></option><option value="덤벨 컬"></option><option value="트라이셉스 푸시다운"></option>
+    <option value="레그 컬"></option><option value="레그 익스텐션"></option><option value="플랭크"></option>
+  </datalist>
+
+  <template id="exerciseTemplate">
+    <div class="exercise-item">
+      <input class="ex-name" type="text" list="exerciseNames" placeholder="운동명 예: 스쿼트" />
+      <div class="exercise-row">
+        <input class="ex-weight" inputmode="decimal" type="number" step="0.5" min="0" placeholder="kg" />
+        <input class="ex-reps" inputmode="numeric" type="number" step="1" min="0" placeholder="회" />
+        <input class="ex-sets" inputmode="numeric" type="number" step="1" min="0" placeholder="세트" />
+        <button class="delete-ex" type="button" aria-label="운동 삭제">×</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
