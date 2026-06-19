@@ -92,14 +92,9 @@
           <div class="exercise-head">
             <div>
               <h3>웨이트</h3>
-              <p class="helper">운동명이 헷갈리면 아래 참조 링크에서 부위별 동작명을 확인하세요.</p>
+              <p class="helper">운동명, 무게, 횟수, 세트를 간단히 기록하세요.</p>
             </div>
             <button id="addExerciseBtn" class="ghost-btn" type="button">운동 추가</button>
-          </div>
-          <div class="reference-links">
-            <a href="https://musclewiki.com/" target="_blank" rel="noopener noreferrer">MuscleWiki 동작 찾기</a>
-            <a href="https://www.acefitness.org/resources/everyone/exercise-library/" target="_blank" rel="noopener noreferrer">ACE 운동 라이브러리</a>
-            <a href="https://en.wikipedia.org/wiki/List_of_weight_training_exercises" target="_blank" rel="noopener noreferrer">웨이트 운동명 목록</a>
           </div>
           <div id="exerciseList" class="exercise-list"></div>
 
@@ -122,17 +117,10 @@
     </main>
   </div>
 
-  <datalist id="exerciseNames">
-    <option value="스쿼트"></option><option value="레그프레스"></option><option value="런지"></option>
-    <option value="데드리프트"></option><option value="벤치프레스"></option><option value="푸시업"></option>
-    <option value="숄더프레스"></option><option value="랫풀다운"></option><option value="시티드 로우"></option>
-    <option value="바벨 로우"></option><option value="덤벨 컬"></option><option value="트라이셉스 푸시다운"></option>
-    <option value="레그 컬"></option><option value="레그 익스텐션"></option><option value="플랭크"></option>
-  </datalist>
 
   <template id="exerciseTemplate">
     <div class="exercise-item">
-      <input class="ex-name" type="text" list="exerciseNames" placeholder="운동명 예: 스쿼트" />
+      <input class="ex-name" type="text" placeholder="운동명 예: 스쿼트" />
       <div class="exercise-row">
         <input class="ex-weight" inputmode="decimal" type="number" step="0.5" min="0" placeholder="kg" />
         <input class="ex-reps" inputmode="numeric" type="number" step="1" min="0" placeholder="회" />
