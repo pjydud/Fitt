@@ -52,6 +52,7 @@ label { display: grid; gap: 7px; color: var(--muted); font-weight: 700; font-siz
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .primary-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #03131a; padding: 15px; font-size: 17px; }
 .ghost-btn { background: rgba(255,255,255,.08); color: var(--text); padding: 10px 12px; }
+.button-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
 .day {
   min-height: 45px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1px solid transparent;
@@ -75,6 +76,9 @@ label { display: grid; gap: 7px; color: var(--muted); font-weight: 700; font-siz
   .summary-card strong { font-size: 17px; }
   .split { grid-template-columns: 1fr; }
   .hero { flex-direction: column; }
+  .section-head { align-items: flex-start; flex-direction: column; }
+  .button-row { width: 100%; justify-content: stretch; }
+  .button-row .ghost-btn { flex: 1; }
 }
 .helper { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
 .reference-links { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: -4px; }
