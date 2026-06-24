@@ -6,9 +6,9 @@ let deferredPrompt = null;
 const $ = (id) => document.getElementById(id);
 const els = {
   datePicker: $('datePicker'), formTitle: $('formTitle'), form: $('workoutForm'), condition: $('condition'),
-  bodyWeight: $('bodyWeight'), runKm: $('runKm'), runMin: $('runMin'), runMemo: $('runMemo'), memo: $('memo'), exerciseList: $('exerciseList'),
+  bodyWeight: $('bodyWeight'), runKm: $('runKm'), runMin: $('runMin'), runMemo: $('runMemo'), memo: $('memo'), dietMemo: $('dietMemo'), exerciseList: $('exerciseList'),
   addExerciseBtn: $('addExerciseBtn'), clearDayBtn: $('clearDayBtn'), calendar: $('calendar'), history: $('history'),
-  weekKm: $('weekKm'), weekSessions: $('weekSessions'), streak: $('streak'), latestWeight: $('latestWeight'), exportBtn: $('exportBtn'), installBtn: $('installBtn')
+  weekKm: $('weekKm'), weekSessions: $('weekSessions'), streak: $('streak'), latestWeight: $('latestWeight'), exportBtn: $('exportBtn'), textExportBtn: $('textExportBtn'), installBtn: $('installBtn')
 };
 
 function toDateKey(date) {
@@ -34,7 +34,7 @@ function saveAll(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 function fmt(dateKey) { const [y,m,d]=dateKey.split('-'); return `${m}/${d}`; }
 function fullFmt(dateKey) { const [y,m,d]=dateKey.split('-'); return `${y}.${m}.${d}`; }
 
-function emptyRecord() { return { condition: '보통', bodyWeight: '', runKm: '', runMin: '', runMemo: '', memo: '', exercises: [] }; }
+function emptyRecord() { return { condition: '보통', bodyWeight: '', runKm: '', runMin: '', runMemo: '', memo: '', dietMemo: '', exercises: [] }; }
 function getRecord(dateKey) { return loadAll()[dateKey] || emptyRecord(); }
 
 function addExercise(ex = {}) {
@@ -62,6 +62,7 @@ function readForm() {
     runMin: els.runMin.value,
     runMemo: els.runMemo.value.trim(),
     memo: els.memo.value.trim(),
+    dietMemo: els.dietMemo.value.trim(),
     exercises,
     updatedAt: new Date().toISOString()
   };
@@ -77,12 +78,13 @@ function fillForm(dateKey) {
   els.runMin.value = rec.runMin || '';
   els.runMemo.value = rec.runMemo || '';
   els.memo.value = rec.memo || '';
+  els.dietMemo.value = rec.dietMemo || '';
   els.exerciseList.innerHTML = '';
   (rec.exercises && rec.exercises.length ? rec.exercises : [{}]).forEach(addExercise);
 }
 
 function hasMeaningful(rec) {
-  return rec && (Number(rec.bodyWeight) > 0 || Number(rec.runKm) > 0 || Number(rec.runMin) > 0 || (rec.exercises || []).length || rec.memo || rec.runMemo || rec.condition === '휴식');
+  return rec && (Number(rec.bodyWeight) > 0 || Number(rec.runKm) > 0 || Number(rec.runMin) > 0 || (rec.exercises || []).length || rec.memo || rec.dietMemo || rec.runMemo || rec.condition === '휴식');
 }
 
 function renderCalendar() {
@@ -138,12 +140,45 @@ function renderHistory() {
     div.innerHTML = `<strong>${fullFmt(key)} · ${rec.condition || '보통'}</strong>
       <p>${rec.bodyWeight ? '몸무게: ' + rec.bodyWeight + 'kg · ' : ''}러닝: ${rec.runKm || 0}km / ${rec.runMin || 0}분 ${rec.runMemo ? '· ' + rec.runMemo : ''}</p>
       ${exText ? `<p>${exText}</p>` : ''}
-      ${rec.memo ? `<p>메모: ${rec.memo}</p>` : ''}`;
+      ${rec.memo ? `<p>메모: ${rec.memo}</p>` : ''}
+      ${rec.dietMemo ? `<p>식단: ${rec.dietMemo}</p>` : ''}`;
     div.addEventListener('click', () => { selectedDate = key; fillForm(key); renderAll(); window.scrollTo({top:0, behavior:'smooth'}); });
     els.history.appendChild(div);
   });
 }
 function renderAll() { renderCalendar(); renderSummary(); renderHistory(); }
+
+function downloadBlob(content, filename, type) {
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildTextExport() {
+  const data = loadAll();
+  const entries = Object.entries(data).filter(([,rec]) => hasMeaningful(rec)).sort((a,b)=>b[0].localeCompare(a[0]));
+  if (!entries.length) return '저장된 운동 기록이 없습니다.';
+
+  return entries.map(([key, rec]) => {
+    const exercises = (rec.exercises || []).length
+      ? (rec.exercises || []).map(ex => `  - ${ex.name || '운동'} / ${ex.weight || '-'}kg / ${ex.reps || '-'}회 / ${ex.sets || '-'}세트`).join('\n')
+      : '  - 없음';
+    return `[${fullFmt(key)}]
+컨디션: ${rec.condition || '보통'}
+몸무게: ${rec.bodyWeight ? rec.bodyWeight + 'kg' : '-'}
+러닝: ${rec.runKm || 0}km / ${rec.runMin || 0}분
+러닝 메모: ${rec.runMemo || '-'}
+웨이트:
+${exercises}
+전체 메모: ${rec.memo || '-'}
+식단 메모: ${rec.dietMemo || '-'}
+`;
+  }).join('\n------------------------------\n\n');
+}
 
 els.datePicker.value = selectedDate;
 els.datePicker.addEventListener('change', e => { selectedDate = e.target.value || todayKey(); fillForm(selectedDate); renderAll(); });
@@ -158,9 +193,10 @@ els.clearDayBtn.addEventListener('click', () => {
   const data = loadAll(); delete data[selectedDate]; saveAll(data); fillForm(selectedDate); renderAll();
 });
 els.exportBtn.addEventListener('click', async () => {
-  const blob = new Blob([JSON.stringify(loadAll(), null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob); const a = document.createElement('a');
-  a.href = url; a.download = `fitness-backup-${todayKey()}.json`; a.click(); URL.revokeObjectURL(url);
+  downloadBlob(JSON.stringify(loadAll(), null, 2), `fitness-backup-${todayKey()}.json`, 'application/json');
+});
+els.textExportBtn.addEventListener('click', () => {
+  downloadBlob(buildTextExport(), `fitness-records-${todayKey()}.txt`, 'text/plain;charset=utf-8');
 });
 
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; els.installBtn.classList.remove('hidden'); });
