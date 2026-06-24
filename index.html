@@ -102,6 +102,11 @@
             <textarea id="memo" rows="3" placeholder="오늘 운동 느낌, 통증, 다음 목표"></textarea>
           </label>
 
+          <label>
+            식단 메모
+            <textarea id="dietMemo" rows="3" placeholder="아침, 점심, 저녁, 간식 등 식단 기록"></textarea>
+          </label>
+
           <button class="primary-btn" type="submit">기록 저장</button>
         </form>
       </section>
@@ -109,7 +114,10 @@
       <section class="card">
         <div class="section-head">
           <h2>최근 기록</h2>
-          <button id="exportBtn" class="ghost-btn" type="button">백업</button>
+          <div class="button-row">
+            <button id="textExportBtn" class="ghost-btn" type="button">텍스트 다운로드</button>
+            <button id="exportBtn" class="ghost-btn" type="button">백업</button>
+          </div>
         </div>
         <div id="history" class="history"></div>
       </section>
